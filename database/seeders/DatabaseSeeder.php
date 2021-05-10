@@ -2,9 +2,13 @@
 
 namespace Database\Seeders;
 
-use BoardPageTable;
 use Illuminate\Database\Seeder;
 
+/**
+ * Class DatabaseSeeder
+ *
+ * @package Database\Seeders
+ */
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -15,7 +19,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            UsersSeeder::class, BoardSeeder::class, BoardPageSeeder::class
-        ],);
+            AdminSeeder::class,
+            TestSeeder::class
+        ]);
     }
 }
