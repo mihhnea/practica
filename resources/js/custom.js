@@ -1,58 +1,215 @@
-//CUSTOM JS
-$("#edit-modal").on("shown.bs.modal", function (event) {
-    let button = $(event.relatedTarget); // Button that triggered the modal
-    let user = button.data("user");
+const { pad } = require("lodash");
 
-    let modal = $(this);
+$(function () {
+    //CUSTOM JS
+    $("#userEditModal").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let user = button.data("user");
 
-    modal.find("#editId").val(user.id);
-    modal.find("#editName").text(user.name);
-    modal.find("#editRole").val(user.role);
-    modal.find("#update-user").attr("data-id", user.id);
-});
+        let modal = $(this);
 
-$("#delete-modal").on("shown.bs.modal", function (e) {
-    e.preventDefault();
+        modal.find("#userEditId").val(user.id);
+        modal.find("#userEditName").text(user.name);
+        modal.find("#userEditRole").val(user.role);
+    });
 
-    const button = $(e.relatedTarget); // Button that triggered the modal
-    const userData = button.data("user");
+    $("#userEditModalAjax").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let user = button.data("user");
 
-    $("#delete-user").on("click", function () {
+        let modal = $(this);
+
+        modal.find("#userEditIdAjax").val(user.id);
+        modal.find("#userEditNameAjax").text(user.name);
+        modal.find("#userEditRoleAjax").val(user.role);
+    });
+
+    $("#userDeleteModal").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let user = button.data("user");
+
+        let modal = $(this);
+
+        modal.find("#userDeleteId").val(user.id);
+        modal.find("#userDeleteName").text(user.name);
+    });
+
+    $("#boardDeleteModal").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let board = button.data("board");
+
+        let modal = $(this);
+
+        modal.find("#boardDeleteId").val(board.id);
+        modal.find("#boardDeleteName").text(board.name);
+    });
+
+    $("#taskEditModal").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let task = button.data("task");
+
+        let modal = $(this);
+
+        modal.find("#taskEditId").val(task.id);
+        modal.find("#taskEditName").val(task.name);
+        modal.find("#taskEditDescription").val(task.description);
+        modal.find("#taskEditStatus").val(task.status);
+    });
+
+    $("#taskDeleteModal").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let task = button.data("task");
+
+        let modal = $(this);
+
+        modal.find("#taskDeleteId").val(task.id);
+        modal.find("#taskDeleteName").text(task.name);
+    });
+
+    /**
+     * Update user using ajax
+     */
+
+    $("#userEditButtonAjax").on("click", function () {
+        $("#userEditAlert").addClass("hidden");
+
+        let id = $("#userEditIdAjax").val();
+        let role = $("#userEditRoleAjax").val();
+
         $.ajax({
-            url: `delete-users/${userData.id}`,
-            processData: false,
-            type: "POST",
-            success: function (data) {
-                //sa afisezi success
-
-                $("#delete-modal").modal("hide");
-                $(".user-row-" + userData.id).remove();
-
-                $("#success").text("It worked");
-            },
+            method: "POST",
+            url: "/user-update/" + id,
+            data: { role: role },
+        }).done(function (response) {
+            if (response.error !== "") {
+                $("#userEditAlert").text(response.error).removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
         });
     });
-});
 
-$(document).on("click", "#update-user", function (e) {
-    e.preventDefault();
+    $("#userDeleteButton").on("click", function () {
+        $("#userDeleteAlert").addClass("hidden");
+        let id = $("#userDeleteId").val();
 
-    const id = $(this).attr("data-id");
-    const roleId = $("#editRole option").filter(":selected").val();
+        $.ajax({
+            method: "POST",
+            url: "/user/delete/" + id,
+        }).done(function (response) {
+            if (response.error !== "") {
+                $("#userDeleteAlert")
+                    .text(response.error)
+                    .removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
+        });
+    });
 
-    $.ajax({
-        url: `update-users/${id}`,
-        data: {
-            role_id: roleId,
-        },
-        type: "PATCH",
-        success: function (data) {
-            //sa afisezi succes
+    $("#changeBoard").on("change", function () {
+        let id = $(this).val();
 
-            $("#edit-modal").modal("hide");
-            $(".user-row-" + data.id + " .role").text(
-                data.role == 1 ? "Admin" : "User"
-            );
-        },
+        window.location.href = "/board/" + id;
+    });
+
+
+
+    $("#boardEditModal").on("shown.bs.modal", function (event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let board = button.data("board");
+
+        $(this).find("#boardEditIdAjax").val(board.id);
+
+        $('#boardEditUserAjax').select2({ width: "300px" });
+
+        const user_ids = board.board_users.map(({ user_id }) => (user_id));
+
+        $('#boardEditUserAjax').val(user_ids).trigger("change");
+    });
+
+    $("#boardEditButton").on("click", function (event) {
+        let user_ids = $("#boardEditUserAjax").val();
+        let id = $("#boardEditIdAjax").val();
+
+        $.ajax({
+            method: "POST",
+            url: "/board/update/" + id,
+            data: {
+                board_user_ids: user_ids,
+            },
+        }).done(function (response) {
+            if (response.error !== "") {
+                $("#boardEditAlert").text(response.error).removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+
+
+    $("#boardDeleteButton").on("click", function () {
+        $("#boardDeleteAlert").addClass("hidden");
+        let id = $("#boardDeleteId").val();
+
+        $.ajax({
+            method: "POST",
+            url: "/board/delete/" + id,
+        }).done(function (response) {
+            if (response.error !== "") {
+                $("#boardDeleteAlert")
+                    .text(response.error)
+                    .removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+
+    $("#taskEditButton").on("click", function () {
+        $("#taskEditAlert").addClass("hidden");
+
+        let id = $("#taskEditId").val();
+        let status = $("#taskEditStatus").val();
+        let name = $("#taskEditName").val();
+        let description = $("#taskEditDescription").val();
+
+        $.ajax({
+            method: "POST",
+            url: "/tasks/update/" + id,
+            data: {
+                status: status,
+                name: name,
+                description: description
+            },
+        }).done(function (response) {
+            if (response.error !== "") {
+                $("#taskEditAlert").text(response.error).removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+
+    $("#taskDeleteButton").on("click", function () {
+        $("#taskDeleteAlert").addClass("hidden");
+        let id = $("#taskDeleteId").val();
+
+        $.ajax({
+            method: "POST",
+            url: "/tasks/delete/" + id,
+        }).done(function (response) {
+            if (!response.error.length) {
+                $("#taskDeleteAlert")
+                    .text(response.success)
+                    .removeClass("hidden");
+                window.location.reload();
+            } else {
+                $("#taskDeleteAlert")
+                    .text(response.error)
+                    .removeClass("hidden");
+                window.location.reload();
+            }
+        });
     });
 });
