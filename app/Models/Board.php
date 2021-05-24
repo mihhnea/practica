@@ -42,6 +42,30 @@ class Board extends Model
     protected $table = 'boards';
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'user_id'
+    ];
+
+
+    /**
+     * Boot method
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($board) {
+            $board->boardUsers()->delete();
+            $board->tasks()->delete();
+        });
+    }
+
+    /**
      * @return BelongsTo
      */
     public function user(): BelongsTo

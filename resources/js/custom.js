@@ -1,75 +1,91 @@
-const { pad } = require("lodash");
+//CUSTOM JS
+$("#userEditModal").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let user = button.data("user");
 
-$(function () {
-    //CUSTOM JS
-    $("#userEditModal").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let user = button.data("user");
+    let modal = $(this);
 
-        let modal = $(this);
+    modal.find("#userEditId").val(user.id);
+    modal.find("#userEditName").text(user.name);
+    modal.find("#userEditRole").val(user.role);
+});
 
-        modal.find("#userEditId").val(user.id);
-        modal.find("#userEditName").text(user.name);
-        modal.find("#userEditRole").val(user.role);
+$("#userEditModalAjax").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let user = button.data("user");
+
+    let modal = $(this);
+
+    modal.find("#userEditIdAjax").val(user.id);
+    modal.find("#userEditNameAjax").text(user.name);
+    modal.find("#userEditRoleAjax").val(user.role);
+});
+
+$("#userDeleteModal").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let user = button.data("user");
+
+    let modal = $(this);
+
+    modal.find("#userDeleteId").val(user.id);
+    modal.find("#userDeleteName").text(user.name);
+});
+
+$("#boardEditModal").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let board = button.data("board");
+
+    let modal = $(this);
+
+    modal.find("#boardEditId").val(board.id);
+    modal.find("#boardEditName").val(board.name);
+
+    let usersSelected = [];
+
+    board.board_users.forEach(function (boardUser) {
+        usersSelected.push(boardUser.user_id);
     });
 
-    $("#userEditModalAjax").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let user = button.data("user");
+    modal.find("#boardEditUsers").val(usersSelected);
+    modal.find("#boardEditUsers").trigger("change");
+});
 
-        let modal = $(this);
+$("#boardDeleteModal").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let board = button.data("board");
 
-        modal.find("#userEditIdAjax").val(user.id);
-        modal.find("#userEditNameAjax").text(user.name);
-        modal.find("#userEditRoleAjax").val(user.role);
-    });
+    let modal = $(this);
 
-    $("#userDeleteModal").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let user = button.data("user");
+    modal.find("#boardDeleteId").val(board.id);
+    modal.find("#boardDeleteName").text(board.name);
+});
 
-        let modal = $(this);
+$("#taskEditModal").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let task = button.data("task");
 
-        modal.find("#userDeleteId").val(user.id);
-        modal.find("#userDeleteName").text(user.name);
-    });
+    let modal = $(this);
 
-    $("#boardDeleteModal").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let board = button.data("board");
+    modal.find("#taskEditId").val(task.id);
+    modal.find("#taskEditName").val(task.name);
+    modal.find("#taskEditDescription").text(task.description);
+    modal
+        .find("#taskEditAssignment")
+        .val(task.assignment ? task.assignment : "");
+    modal.find("#taskEditStatus").val(task.status);
+});
 
-        let modal = $(this);
+$("#taskDeleteModal").on("shown.bs.modal", function (event) {
+    let button = $(event.relatedTarget); // Button that triggered the modal
+    let task = button.data("task");
 
-        modal.find("#boardDeleteId").val(board.id);
-        modal.find("#boardDeleteName").text(board.name);
-    });
+    let modal = $(this);
 
-    $("#taskEditModal").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let task = button.data("task");
+    modal.find("#taskDeleteId").val(task.id);
+    modal.find("#taskDeleteName").text(task.name);
+});
 
-        let modal = $(this);
-
-        modal.find("#taskEditId").val(task.id);
-        modal.find("#taskEditName").val(task.name);
-        modal.find("#taskEditDescription").val(task.description);
-        modal.find("#taskEditStatus").val(task.status);
-    });
-
-    $("#taskDeleteModal").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let task = button.data("task");
-
-        let modal = $(this);
-
-        modal.find("#taskDeleteId").val(task.id);
-        modal.find("#taskDeleteName").text(task.name);
-    });
-
-    /**
-     * Update user using ajax
-     */
-
+$(document).ready(function () {
     $("#userEditButtonAjax").on("click", function () {
         $("#userEditAlert").addClass("hidden");
 
@@ -113,31 +129,25 @@ $(function () {
         window.location.href = "/board/" + id;
     });
 
+    $("#boardEditUsers").select2();
 
+    $("#boardEditButton").on("click", function () {
+        $("#boardEditAlert").addClass("hidden");
 
-    $("#boardEditModal").on("shown.bs.modal", function (event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
-        let board = button.data("board");
+        let id = $("#boardEditId").val();
+        let name = $("#boardEditName").val();
+        let boardUsersData = $("#boardEditUsers").select2("data");
+        console.log(boardUsersData);
+        let boardUsers = [];
 
-        $(this).find("#boardEditIdAjax").val(board.id);
-
-        $('#boardEditUserAjax').select2({ width: "300px" });
-
-        const user_ids = board.board_users.map(({ user_id }) => (user_id));
-
-        $('#boardEditUserAjax').val(user_ids).trigger("change");
-    });
-
-    $("#boardEditButton").on("click", function (event) {
-        let user_ids = $("#boardEditUserAjax").val();
-        let id = $("#boardEditIdAjax").val();
+        boardUsersData.forEach(function (item) {
+            boardUsers.push(item.id);
+        });
 
         $.ajax({
             method: "POST",
             url: "/board/update/" + id,
-            data: {
-                board_user_ids: user_ids,
-            },
+            data: { name, boardUsers },
         }).done(function (response) {
             if (response.error !== "") {
                 $("#boardEditAlert").text(response.error).removeClass("hidden");
@@ -146,7 +156,6 @@ $(function () {
             }
         });
     });
-
 
     $("#boardDeleteButton").on("click", function () {
         $("#boardDeleteAlert").addClass("hidden");
@@ -170,18 +179,15 @@ $(function () {
         $("#taskEditAlert").addClass("hidden");
 
         let id = $("#taskEditId").val();
-        let status = $("#taskEditStatus").val();
         let name = $("#taskEditName").val();
-        let description = $("#taskEditDescription").val();
+        let description = $("#taskEditDescription").text();
+        let assignment = $("#taskEditAssignment").val();
+        let status = $("#taskEditStatus").val();
 
         $.ajax({
             method: "POST",
-            url: "/tasks/update/" + id,
-            data: {
-                status: status,
-                name: name,
-                description: description
-            },
+            url: "/task/update/" + id,
+            data: { name, description, assignment, status },
         }).done(function (response) {
             if (response.error !== "") {
                 $("#taskEditAlert").text(response.error).removeClass("hidden");
@@ -197,17 +203,78 @@ $(function () {
 
         $.ajax({
             method: "POST",
-            url: "/tasks/delete/" + id,
+            url: "/task/delete/" + id,
         }).done(function (response) {
-            if (!response.error.length) {
-                $("#taskDeleteAlert")
-                    .text(response.success)
-                    .removeClass("hidden");
-                window.location.reload();
-            } else {
+            if (response.error !== "") {
                 $("#taskDeleteAlert")
                     .text(response.error)
                     .removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+
+    $("#boardCreateUsers").select2();
+
+    $("#boardCreateButton").on("click", function () {
+        $("#boardCreateAlert").addClass("hidden");
+
+        let name = $("#boardCreateName").val();
+        let boardUsersData = $("#boardCreateUsers").select2("data");
+
+        let boardUsers = [];
+
+        boardUsersData.forEach(function (item) {
+            boardUsers.push(item.id);
+        });
+
+        $.ajax({
+            method: "POST",
+            url: "/board/create",
+            data: { name, boardUsers },
+        }).done(function (response) {
+            if (response.error !== "") {
+                let html = "<ul>";
+
+                Object.values(response.error).forEach((element) => {
+                    html += "<li>" + element + "</li>";
+                });
+
+                html += "</ul>";
+
+                $("#boardCreateAlert").html(html).removeClass("hidden");
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+
+    $("#taskCreateButton").on("click", function () {
+        $("#taskCreateAlert").addClass("hidden");
+
+        let name = $("#taskCreateName").val();
+        let description = $("#taskCreateDescription").val();
+        let assignment = $("#taskCreateAssignment").val();
+        let status = $("#taskCreateStatus").val();
+        let url = window.location.pathname;
+        const board_id = url.substring(url.lastIndexOf("/") + 1);
+        $.ajax({
+            method: "POST",
+            url: "/task/create",
+            data: { name, description, assignment, status, board_id },
+        }).done(function (response) {
+            if (response.error !== "") {
+                let html = "<ul>";
+
+                Object.values(response.error).forEach((element) => {
+                    html += "<li>" + element + "</li>";
+                });
+
+                html += "</ul>";
+
+                $("#taskCreateAlert").html(html).removeClass("hidden");
+            } else {
                 window.location.reload();
             }
         });

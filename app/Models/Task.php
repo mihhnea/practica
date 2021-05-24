@@ -47,6 +47,18 @@ class Task extends Model
     protected $table = 'tasks';
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'board_id',
+        'description'
+    ];
+
+
+    /**
      * @return BelongsTo
      */
     public function board(): BelongsTo

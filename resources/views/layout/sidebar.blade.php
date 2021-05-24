@@ -33,14 +33,14 @@
                 </li>
 
                 @if($user->role === \App\Models\User::ROLE_ADMIN)
-                <li class="nav-item">
-                    <a href="{{route('users.all')}}" class="nav-link">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>
-                            Users
-                        </p>
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a href="{{route('users.all')}}" class="nav-link">
+                            <i class="nav-icon fas fa-th"></i>
+                            <p>
+                                Users
+                            </p>
+                        </a>
+                    </li>
                 @endif
 
                 <li class="nav-item">
@@ -48,6 +48,15 @@
                         <i class="nav-icon fas fa-copy"></i>
                         <p>
                             Boards
+                        </p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{route('logout')}}" class="nav-link">
+                        <i class="nav-icon fas fa-columns"></i>
+                        <p>
+                            Logout
                         </p>
                     </a>
                 </li>

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use App\Models\Board;
+use App\Models\Task;
+use App\Models\User;
 
 /**
  * Class DashboardController
@@ -18,6 +21,15 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return view('dashboard.index');
+        $boards = Board::get();
+        $tasks = Task::get();
+
+        return view(
+            'dashboard.index',
+            [
+                'boards' => $boards,
+                'tasks' => $tasks
+            ]
+        );
     }
 }

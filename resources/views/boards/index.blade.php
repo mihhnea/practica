@@ -23,16 +23,14 @@
 
     <!-- Default box -->
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Boards list</h3>
+        <div style="display:flex;justify-content:space-between;text-align:center">
+            <h3 class="card-title" style="padding: 27px 10px 0 20px;">Boards list</h3>
+            <div class="btn-group" style="padding: 27px 21px 0 20px;">
+                <button class="btn btn-sm btn-success" type="button" data-board="{{json_encode($boards)}}" data-toggle="modal" data-target="#boardCreateModal">
+                    <i class="fas fa-plus-square"></i></button>
+            </div>
         </div>
-        @if (session('success'))
-        <div class="alert alert-success" role="alert">{{session('success')}}</div>
-        @endif
 
-        @if (session('error'))
-        <div class="alert alert-danger" role="alert">{{session('error')}}</div>
-        @endif
         <div class="card-body">
             <table class="table table-bordered">
                 <thead>
@@ -56,10 +54,11 @@
                             {{count($board->boardUsers)}}
                         </td>
                         <td>
-                            @if(auth()->user()->role || auth()->user()->id === $board->user_id) <div class="btn-group">
-                                <button class="btn btn-xs btn-primary" type="button" data-board="{{json_encode($board)}}" data-toggle="modal" data-target="#boardEditModal">
+                            @if ($board->user->id === \Illuminate\Support\Facades\Auth::user()->id || \Illuminate\Support\Facades\Auth::user()->role === \App\Models\User::ROLE_ADMIN)
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-primary" type="button" data-board="{{json_encode($board)}}" data-toggle="modal" data-target="#boardEditModal">
                                     <i class="fas fa-edit"></i></button>
-                                <button class="btn btn-xs btn-danger" type="button" data-board="{{json_encode($board)}}" data-toggle="modal" data-target="#boardDeleteModal">
+                                <button class="btn btn-sm btn-danger" type="button" data-board="{{json_encode($board)}}" data-toggle="modal" data-target="#boardDeleteModal">
                                     <i class="fas fa-trash"></i></button>
                             </div>
                             @endif
@@ -104,6 +103,44 @@
     </div>
     <!-- /.card -->
 
+    <div class="modal fade" id="boardCreateModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Create board</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-danger hidden" id="boardCreateAlert"></div>
+                    <input type="hidden" id="boardCreateId" value="" />
+                    <div class="form-group">
+                        @if ($errors->has('name'))
+                        <div class="alert alert-danger">{{$errors->first('name')}}</div> @endif
+                        <label for="boardCreateName">Name</label>
+                        <input type="text" class="form-control" id="boardCreateName" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        @if ($errors->has('boardUsers'))
+                        <div class="alert alert-danger">{{$errors->first('boardUsers')}}</div> @endif
+                        <label for="boardCreateUsers">Members</label>
+                        <select class="select2bs4" multiple="multiple" data-placeholder="Select board users" id="boardCreateUsers" style="width: 100%;">
+                            @foreach ($userList as $user)
+                            <option value="{{$user['id']}}">{{$user['name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="boardCreateButton">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="boardEditModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -115,13 +152,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger hidden" id="boardEditAlert"></div>
-                    <div id="boardEditNameAjax"></div>
-                    <input type="hidden" id="boardEditIdAjax" value="" />
+                    <input type="hidden" id="boardEditId" value="" />
                     <div class="form-group">
-                        <label for="boardEditUserAjax">User</label>
-                        <select class="js-example-basic-multiple" id="boardEditUserAjax" name="states[]" values=[] multiple>
-                            @foreach ($users as $user)
-                            <option value="{{$user->id}}">{{$user->name}}</option>
+                        <label for="boardEditName">Name</label>
+                        <input type="text" class="form-control" id="boardEditName" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="boardEditUsers">Board Users</label>
+                        <select class="select2bs4" multiple="multiple" data-placeholder="Select board users" id="boardEditUsers" style="width: 100%;">
+                            @foreach ($userList as $user)
+                            <option value="{{$user['id']}}">{{$user['name']}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -160,6 +200,4 @@
 
 </section>
 <!-- /.content -->
-
-
 @endsection
